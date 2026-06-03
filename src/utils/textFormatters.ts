@@ -9,12 +9,13 @@ export function capitalizarTexto(texto: string): string {
 }
 
 //Formata um array de tipos de Pokémon em uma única string separada por vírgula e capitalizada
-export function formatarTipos(tipos: string[]): string {
+export function formatarTipos(tipos: { type: { name: string } }[]): string {
     if (!tipos || tipos.length === 0) {
         return "Nenhum";
     }
 
-    return tipos.map((tipo) => capitalizarTexto(tipo)).join(', ');
+    // Mapeia usando o 'type.name' de dentro de cada objeto do array
+    return tipos.map((slot) => capitalizarTexto(slot.type.name)).join(', ');
 }
 
 //Converte a altura da PokeAPI (decímetros) para metros formatados
