@@ -1,4 +1,11 @@
 import readlineSync from 'readline-sync';
+import { ApiService } from '../services/apiService.js';
+import {
+  capitalizarTexto,
+  formatarTipos,
+  formatarAltura,
+  formatarPeso
+} from '../utils/textFormatters.js';
 
 export class MenuView {
     //Renderiza as opções visuais do menu no terminal
@@ -12,8 +19,41 @@ export class MenuView {
         console.log('===================================================');
     }
 
+    //Orquestra a busca do Pokémon na API e exibe o resultado formatado
+    private async executarBusca(): Promise<void> {
+        const termo = readlineSync.question("\n Digite o nome ou ID do Pokemon: ").toLowerCase().trim();
+
+        if (!termo) {
+            console.log("\n⚠️ O nome ou ID não pode ser vazio!");
+            return;
+        }
+
+        console.log(`\n🔍 A buscar o "${termo}" na PokeAPI...`);
+
+        try {
+            const pokemon = await ApiService.buscarPokemon(termo);
+
+            if (!pokemon) {
+                console.log("\n❌ Pokemon não encontrado. Verifique a ortografia.");
+                return;
+            }
+
+            //Exibe os dados formatados
+            console.log('\n---------------------------------------------------');
+            console.log(`📊 RESULTADO DA BUSCA:`);
+            console.log(`🆔 ID: ${pokemon.id}`);
+            console.log(`📛 Nome: ${capitalizarTexto(pokemon.name)}`);
+            console.log(`🌾 Tipos: ${formatarTipos(pokemon.types)}`);
+            console.log(`📏 Altura: ${formatarAltura(pokemon.height)}`);
+            console.log(`⚖️ Peso: ${formatarPeso(pokemon.weight)}`);
+            console.log('---------------------------------------------------');
+        } catch (error) {
+            console.log("\n❌ Erro ao ligar a API. Verifique sua conexão com a internet.");
+        }
+    }
+
     //Inicia o loop principal do menu que mantém o programa rodando
-    public iniciar(): void {
+    public async iniciar(): Promise<void> {
         let rodando = true;
 
         while (rodando) {
@@ -27,7 +67,7 @@ export class MenuView {
             }
 
             if (opcao === '1') {
-                console.log("\n🔍 Funcionalidade selecionada: Buscar Pokémon (Em breve)...");
+                await this.executarBusca();
                 continue;
             }
 
