@@ -6,8 +6,12 @@ import {
   formatarAltura,
   formatarPeso
 } from '../utils/textFormatters.js';
+import { BoxRepository } from '../repository/BoxRepository.js';
 
 export class MenuView {
+    //Propriedade para lembrar do último Pokémon pesquisado com sucesso
+    private pokemonUltimaBusca: any = null;
+
     //Renderiza as opções visuais do menu no terminal
     private exibirOpcoes(): void {
         console.log('\n=================== POKÉDEX CLI ===================');
@@ -20,7 +24,7 @@ export class MenuView {
     }
 
     //Orquestra a busca do Pokémon na API e exibe o resultado formatado
-    private async executarBusca(): Promise<void> {
+    private async executarBusca(): Promise<void> { // <-- Corrigido o nome aqui!
         const termo = readlineSync.question("\n Digite o nome ou ID do Pokemon: ").toLowerCase().trim();
 
         if (!termo) {
@@ -34,9 +38,12 @@ export class MenuView {
             const pokemon = await ApiService.buscarPokemon(termo);
 
             if (!pokemon) {
-                console.log("\n❌ Pokemon não encontrado. Verifique a ortografia.");
+                console.log("\n❌ Pokemon não encontrado. Verifique o nome ou ID e tente novamente.");
                 return;
             }
+
+            // Guardar o Pokémon encontrado para caso o usuário queira capturar na Opção 2
+            this.pokemonUltimaBusca = pokemon;
 
             //Exibe os dados formatados
             console.log('\n---------------------------------------------------');
@@ -67,12 +74,12 @@ export class MenuView {
             }
 
             if (opcao === '1') {
-                await this.executarBusca();
+                await this.executarBusca(); 
                 continue;
             }
 
             if (opcao === '2') {
-                console.log("\n📸 Funcionalidade selecionada: Capturar Pokémon (Em breve)...");
+                this.executarCaptura();
                 continue;
             }
 
@@ -88,7 +95,26 @@ export class MenuView {
 
             // Se o usuário digitar qualquer outra coisa inválida (letras ou outros números)
             console.log("\n⚠️ Opção inválida! Digite um número de 0 a 4");
-
         }
+    }
+
+    //Pega o Pokémon da última busca realizada e salva na Box
+    private executarCaptura(): void {
+        if (!this.pokemonUltimaBusca) {
+            console.log('\n⚠️ Nenhum Pokémon foi buscado recentemente! Busque um Pokémon na opção 1 antes de capturar.');
+            return;
+        }
+
+        const salvoComSucesso = BoxRepository.salvar(this.pokemonUltimaBusca);
+
+        if (!salvoComSucesso) {
+            console.log(`\n❌ O Pokémon ${this.pokemonUltimaBusca.name.toUpperCase()} já está na sua Box!`);
+            return;
+        }
+
+        console.log(`\n🎉 Sucesso! ${this.pokemonUltimaBusca.name.toUpperCase()} foi capturado e salvo na sua Box! 📸📦`);
+        
+        // Limpa para exigir uma nova busca antes do próximo comando de captura
+        this.pokemonUltimaBusca = null; 
     }
 }
