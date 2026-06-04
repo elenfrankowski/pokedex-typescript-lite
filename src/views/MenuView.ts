@@ -7,6 +7,7 @@ import {
   formatarPeso
 } from '../utils/textFormatters.js';
 import { BoxRepository } from '../repository/BoxRepository.js';
+import { read } from 'fs';
 
 export class MenuView {
     //Propriedade para lembrar do último Pokémon pesquisado com sucesso
@@ -24,7 +25,7 @@ export class MenuView {
     }
 
     //Orquestra a busca do Pokémon na API e exibe o resultado formatado
-    private async executarBusca(): Promise<void> { // <-- Corrigido o nome aqui!
+    private async executarBusca(): Promise<void> { 
         const termo = readlineSync.question("\n Digite o nome ou ID do Pokemon: ").toLowerCase().trim();
 
         if (!termo) {
@@ -89,7 +90,7 @@ export class MenuView {
             }
 
             if (opcao === '4') {
-                console.log("\n🌾 Funcionalidade selecionada: Filtrar por tipo (Em breve)...");
+                this.executarFiltragem();
                 continue;
             }
 
@@ -140,6 +141,45 @@ export class MenuView {
         });
 
         console.log('==============================================================');
+  }
+
+  //Pede um tipo ao usuário e exibe apenas os Pokémons da Box que possuem esse tipo
+  private executarFiltragem(): void {
+    const listaPokemons = BoxRepository.listarTodos();
+
+    if (listaPokemons.length === 0) {
+        console.log("\n Sua Box está vazia! Não há Pokémons para filtar.")
+        return;
+    }
+
+    const tipoAlvo = readlineSync.question ("\n🌾 Digite o tipo de Pokémon para filtrar (ex: fire, water, grass): ").toLowerCase().trim();
+
+    if (!tipoAlvo) {
+        console.log("\n⚠️ O tipo não pode ser vazio!");
+        return;
+    }
+
+    //Filtra os Pokémons onde pelo menos um dos tipos da API seja igual ao digitado
+    const pokemonsFiltrados = listaPokemons.filter((pokemon) => 
+        pokemon.types.some((t) => t.type.name.toLowerCase() === tipoAlvo)
+    );
+
+    if (pokemonsFiltrados.length === 0) {
+        console.log(`\n🔍 Nenhum Pokémon do tipo "${tipoAlvo.toUpperCase()}" foi encontrado na sua Box.`);
+        return;
+    }
+
+    console.log(`\n=================== 🌾 POKÉMONS DO TIPO: ${tipoAlvo.toUpperCase()} ===================`);
+
+    pokemonsFiltrados.forEach((pokemon, index) => {
+        console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${formatarTipos(pokemon.types)}`);
+
+        if (index < pokemonsFiltrados.length - 1) {
+            console.log('--------------------------------------------------------------');
+        }
+    });
+
+    console.log('====================================================================');
   }
     
 }
