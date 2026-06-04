@@ -52,7 +52,7 @@ export class MenuView {
             console.log(`📛 Nome: ${capitalizarTexto(pokemon.name)}`);
             console.log(`🌾 Tipos: ${formatarTipos(pokemon.types)}`);
             console.log(`📏 Altura: ${formatarAltura(pokemon.height)}`);
-            console.log(`⚖️ Peso: ${formatarPeso(pokemon.weight)}`);
+            console.log(`⚖️  Peso: ${formatarPeso(pokemon.weight)}`);
             console.log('---------------------------------------------------');
         } catch (error) {
             console.log("\n❌ Erro ao ligar a API. Verifique sua conexão com a internet.");
@@ -84,7 +84,7 @@ export class MenuView {
             }
 
             if (opcao === '3') {
-                console.log("\n📦 Funcionalidade selecionada: Listar Box (Em breve)...");
+                this.executarListagem();
                 continue;
             }
 
@@ -112,9 +112,34 @@ export class MenuView {
             return;
         }
 
-        console.log(`\n🎉 Sucesso! ${this.pokemonUltimaBusca.name.toUpperCase()} foi capturado e salvo na sua Box! 📸📦`);
+        console.log(`\n🎉 Sucesso! ${this.pokemonUltimaBusca.name.toUpperCase()} foi capturado e salvo na sua Box! 📸 📦`);
         
         // Limpa para exigir uma nova busca antes do próximo comando de captura
         this.pokemonUltimaBusca = null; 
     }
+
+    //Obtém todos os Pokémons salvos no repositório e exibe na tela
+    private executarListagem(): void {
+        const listaPokemons = BoxRepository.listarTodos();
+
+        if (listaPokemons.length === 0) {
+            console.log("\n Sua Box está vazia! Capture algum Pokémon na opção 2 primeiro.");
+            return;
+        }
+
+        console.log('\n=================== 📦 SUA BOX DE POKÉMONS ===================');
+    
+        // Percorre a lista exibindo as informações básicas de cada um de forma simplificada
+        listaPokemons.forEach((pokemon, index) => {
+            console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${formatarTipos(pokemon.types)}`);
+
+            // Se não for o último Pokémon da lista, adiciona a linha separadora
+            if (index < listaPokemons.length - 1) {
+                console.log('--------------------------------------------------------------');
+            }
+        });
+
+        console.log('==============================================================');
+  }
+    
 }
