@@ -21,4 +21,16 @@ export class BoxRepository {
   public static listarTodos(): PokemonApiResponse[] {
     return BoxRepository.box;
   }
+
+  //Remove um Pokémon da Box através do seu ID
+  public static remover(id: number): boolean {
+    const existe = this.box.some((pokemon) => pokemon.id === id);
+
+    if (!existe) {
+      return false;
+    }
+
+    this.box = this.box.filter((pokemon) => pokemon.id !== id);
+    return true;
+  }
 }
