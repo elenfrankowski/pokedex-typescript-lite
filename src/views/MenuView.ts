@@ -19,7 +19,8 @@ export class MenuView {
         console.log('1. 🔍 Buscar Pokémon na API (Por Nome ou ID)');
         console.log('2. 📸 Capturar Pokémon atual para a Box');
         console.log('3. 📦 Listar todos os Pokémons da Box');
-        console.log('4. 🌾 Filtrar Pokémons da Box por Tipo');
+        console.log('4. 🗑️  Remover Pokémon da Box por ID');
+        console.log('5. 🌾 Filtrar Pokémons da Box por Tipo');
         console.log('0. 🚪 Sair do Programa');
         console.log('===================================================');
     }
@@ -66,7 +67,7 @@ export class MenuView {
 
         while (rodando) {
             this.exibirOpcoes();
-            const opcao = readlineSync.question("Escolha uma opcao: ").trim();
+            const opcao = readlineSync.question("Escolha uma opção: ").trim();
 
             if (opcao === '0') {
                 console.log("\n👋 Obrigado por usar a Pokédex CLI! Até a próxima.");
@@ -90,19 +91,23 @@ export class MenuView {
             }
 
             if (opcao === '4') {
+                this.executarRemocao();
+                continue;
+            }
+
+            if (opcao === '5') {
                 this.executarFiltragem();
                 continue;
             }
 
-            // Se o usuário digitar qualquer outra coisa inválida (letras ou outros números)
-            console.log("\n⚠️ Opção inválida! Digite um número de 0 a 4");
+            console.log("\n⚠️  Opção inválida! Digite um número de 0 a 5");
         }
     }
 
     //Pega o Pokémon da última busca realizada e salva na Box
     private executarCaptura(): void {
         if (!this.pokemonUltimaBusca) {
-            console.log('\n⚠️ Nenhum Pokémon foi buscado recentemente! Busque um Pokémon na opção 1 antes de capturar.');
+            console.log('\n⚠️  Nenhum Pokémon foi buscado recentemente! Busque um Pokémon na opção 1 antes de capturar.');
             return;
         }
 
@@ -180,6 +185,33 @@ export class MenuView {
     });
 
     console.log('====================================================================');
+  }
+
+
+  private executarRemocao(): void {
+    const listaPokemons = BoxRepository.listarTodos();
+
+    if (listaPokemons.length === 0) {
+        console.log("\n Sua Box está vazia! Não há Pokémons para remover.");
+        return;
+    }
+
+    const idInput = readlineSync.question("\n🗑️  Digite o ID do Pokémon que deseja remover: ").trim();
+    const idNum = Number(idInput);
+
+    if (isNaN(idNum) || !idInput) {
+        console.log("\n⚠️ Por favor, digite um ID numérico válido!");
+        return;
+    }
+
+    const removido = BoxRepository.remover(idNum);
+
+    if (!removido) {
+        console.log(`\n⚠️  Nenhum Pokémon encontrado com o ID #${idNum}.`);
+        return;
+    }
+
+    console.log(`\n✅ Pokémon com ID #${idNum} foi removido com sucesso da sua Box!`);
   }
     
 }
