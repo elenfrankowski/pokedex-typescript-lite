@@ -1,4 +1,4 @@
-import { PokemonApiResponse } from '../models/Pokemon.js';
+import { PokemonApiResponse } from '../models/PokemonResumo.js';
 
 export class BoxRepository {
   // Array privado que funciona como "banco de dados" na memória
