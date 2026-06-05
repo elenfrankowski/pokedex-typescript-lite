@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { PokemonResumo } from '../models/Pokemon.js';
+import { PokemonResumo } from '../models/PokemonResumo.js';
 
 export class BoxService {
     //Caminho absoluto para o arquivo pc_box.json na raiz do projeto

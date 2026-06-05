@@ -1,4 +1,3 @@
-//Interface que mapeia exatamente a resposta detalhada que vem da POkeAPI externa
 export interface PokemonApiResponse {
     id: number;
     name: string;
@@ -11,10 +10,32 @@ export interface PokemonApiResponse {
             url: string;
         }
     }[];
+    stats: {
+        base_stat: number;
+        stat: {
+            name: string;
+            url: string;
+        }
+    }[];
 }
 
-//Interface simplificada que define a estrutura do Pokémon que será salva no pc_box.json
 export interface PokemonResumo {
+    id: number;
+    name: string;
+    types: {
+        type: {
+            name: string;
+        };
+    }[];
+    stats: {
+        base_stat: number;
+        stat: {
+            name: string;
+        };
+    }[];
+}
+
+export interface PokemonBoxLocal {
     id: number;
     nome: string;
     tipoPrincipal: string;

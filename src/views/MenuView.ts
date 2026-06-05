@@ -2,18 +2,15 @@ import readlineSync from 'readline-sync';
 import { ApiService } from '../services/apiService.js';
 import {
   capitalizarTexto,
-  formatarTipos,
-  formatarAltura,
-  formatarPeso
+  formatarTipos
 } from '../utils/textFormatters.js';
 import { BoxRepository } from '../repository/BoxRepository.js';
-import { read } from 'fs';
 
 export class MenuView {
-    //Propriedade para lembrar do último Pokémon pesquisado com sucesso
+    // Propriedade para lembrar do último Pokémon pesquisado com sucesso
     private pokemonUltimaBusca: any = null;
 
-    //Renderiza as opções visuais do menu no terminal
+    // Renderiza as opções visuais do menu no terminal
     private exibirOpcoes(): void {
         console.log('\n=================== POKÉDEX CLI ===================');
         console.log('1. 🔍 Buscar Pokémon na API (Por Nome ou ID)');
@@ -25,7 +22,7 @@ export class MenuView {
         console.log('===================================================');
     }
 
-    //Orquestra a busca do Pokémon na API e exibe o resultado formatado
+    // Orquestra a busca do Pokémon na API e exibe o resultado formatado
     private async executarBusca(): Promise<void> { 
         const termo = readlineSync.question("\n Digite o nome ou ID do Pokemon: ").toLowerCase().trim();
 
@@ -47,21 +44,31 @@ export class MenuView {
             // Guardar o Pokémon encontrado para caso o usuário queira capturar na Opção 2
             this.pokemonUltimaBusca = pokemon;
 
-            //Exibe os dados formatados
-            console.log('\n---------------------------------------------------');
-            console.log(`📊 RESULTADO DA BUSCA:`);
-            console.log(`🆔 ID: ${pokemon.id}`);
-            console.log(`📛 Nome: ${capitalizarTexto(pokemon.name)}`);
-            console.log(`🌾 Tipos: ${formatarTipos(pokemon.types)}`);
-            console.log(`📏 Altura: ${formatarAltura(pokemon.height)}`);
-            console.log(`⚖️  Peso: ${formatarPeso(pokemon.weight)}`);
-            console.log('---------------------------------------------------');
+            // Exibe os dados formatados de acordo com a nova interface PokemonResumo
+            console.log('\n--------------------------------------------------');
+            console.log(`📊  RESULTADO DA BUSCA:`);
+            console.log(`🆔  ID: ${pokemon.id}`);
+            console.log(`📛  Nome: ${pokemon.name.toUpperCase()}`);
+
+            // Extrai os tipos usando map 
+            const tiposFormatados = pokemon.types.map(t => t.type.name).join(', ');
+            console.log(`🌿  Tipos: ${tiposFormatados}`);
+
+            // Extrai os stats numéricos do array de stats 
+            const hp = pokemon.stats.find(s => s.stat.name === 'hp')?.base_stat || 0;
+            const attack = pokemon.stats.find(s => s.stat.name === 'attack')?.base_stat || 0;
+            const defense = pokemon.stats.find(s => s.stat.name === 'defense')?.base_stat || 0;
+
+            console.log(`❤️   HP: ${hp}`);
+            console.log(`⚔️   Ataque: ${attack}`);
+            console.log(`🛡️   Defesa: ${defense}`);
+            console.log('--------------------------------------------------');
         } catch (error) {
             console.log("\n❌ Erro ao ligar a API. Verifique sua conexão com a internet.");
         }
     }
 
-    //Inicia o loop principal do menu que mantém o programa rodando
+    // Inicia o loop principal do menu que mantém o programa rodando
     public async iniciar(): Promise<void> {
         let rodando = true;
 
@@ -104,7 +111,7 @@ export class MenuView {
         }
     }
 
-    //Pega o Pokémon da última busca realizada e salva na Box
+    // Pega o Pokémon da última busca realizada e salva na Box
     private executarCaptura(): void {
         if (!this.pokemonUltimaBusca) {
             console.log('\n⚠️  Nenhum Pokémon foi buscado recentemente! Busque um Pokémon na opção 1 antes de capturar.');
@@ -124,7 +131,7 @@ export class MenuView {
         this.pokemonUltimaBusca = null; 
     }
 
-    //Obtém todos os Pokémons salvos no repositório e exibe na tela
+    // Obtém todos os Pokémons salvos no repositório e exibe na tela com os Stats
     private executarListagem(): void {
         const listaPokemons = BoxRepository.listarTodos();
 
@@ -135,83 +142,102 @@ export class MenuView {
 
         console.log('\n=================== 📦 SUA BOX DE POKÉMONS ===================');
     
-        // Percorre a lista exibindo as informações básicas de cada um de forma simplificada
         listaPokemons.forEach((pokemon, index) => {
-            console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${formatarTipos(pokemon.types)}`);
+            const tiposFormatados = formatarTipos(pokemon.types);
+            
+            // Extrai os status numéricos para exibir na lista
+            const hp = pokemon.stats.find((s: any) => s.stat.name === 'hp')?.base_stat || 0;
+            const attack = pokemon.stats.find((s: any) => s.stat.name === 'attack')?.base_stat || 0;
+            const defense = pokemon.stats.find((s: any) => s.stat.name === 'defense')?.base_stat || 0;
 
-            // Se não for o último Pokémon da lista, adiciona a linha separadora
+            console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${tiposFormatados}`);
+            console.log(`📊 Stats -> ❤️  HP: ${hp} | ⚔️  ATK: ${attack} | 🛡️  DEF: ${defense}`);
+
             if (index < listaPokemons.length - 1) {
                 console.log('--------------------------------------------------------------');
             }
         });
 
         console.log('==============================================================');
-  }
-
-  //Pede um tipo ao usuário e exibe apenas os Pokémons da Box que possuem esse tipo
-  private executarFiltragem(): void {
-    const listaPokemons = BoxRepository.listarTodos();
-
-    if (listaPokemons.length === 0) {
-        console.log("\n Sua Box está vazia! Não há Pokémons para filtar.")
-        return;
     }
 
-    const tipoAlvo = readlineSync.question ("\n🌾 Digite o tipo de Pokémon para filtrar (ex: fire, water, grass): ").toLowerCase().trim();
+    // Pede um tipo ao usuário e exibe apenas os Pokémons da Box que possuem esse tipo
+    private executarFiltragem(): void {
+        const listaPokemons = BoxRepository.listarTodos();
 
-    if (!tipoAlvo) {
-        console.log("\n⚠️ O tipo não pode ser vazio!");
-        return;
-    }
-
-    //Filtra os Pokémons onde pelo menos um dos tipos da API seja igual ao digitado
-    const pokemonsFiltrados = listaPokemons.filter((pokemon) => 
-        pokemon.types.some((t) => t.type.name.toLowerCase() === tipoAlvo)
-    );
-
-    if (pokemonsFiltrados.length === 0) {
-        console.log(`\n🔍 Nenhum Pokémon do tipo "${tipoAlvo.toUpperCase()}" foi encontrado na sua Box.`);
-        return;
-    }
-
-    console.log(`\n=================== 🌾 POKÉMONS DO TIPO: ${tipoAlvo.toUpperCase()} ===================`);
-
-    pokemonsFiltrados.forEach((pokemon, index) => {
-        console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${formatarTipos(pokemon.types)}`);
-
-        if (index < pokemonsFiltrados.length - 1) {
-            console.log('--------------------------------------------------------------');
+        if (listaPokemons.length === 0) {
+            console.log("\n Sua Box está vazia! Não há Pokémons para filtrar.");
+            return;
         }
-    });
 
-    console.log('====================================================================');
-  }
+        console.log('\n--- 📦 POKÉMONS DISPONÍVEIS NA SUA BOX ---');
+        this.executarListagem();
 
+        const tipoAlvo = readlineSync.question("\n🌾 Digite o tipo de Pokémon para filtrar (ex: fire, water, grass): ").toLowerCase().trim();
 
-  private executarRemocao(): void {
-    const listaPokemons = BoxRepository.listarTodos();
+        if (!tipoAlvo) {
+            console.log("\n⚠️ O tipo não pode ser vazio!");
+            return;
+        }
 
-    if (listaPokemons.length === 0) {
-        console.log("\n Sua Box está vazia! Não há Pokémons para remover.");
-        return;
+        // Filtra os Pokémons onde pelo menos um dos tipos da API seja igual ao digitado
+        const pokemonsFiltrados = listaPokemons.filter((pokemon) => 
+            pokemon.types.some((t) => t.type.name.toLowerCase() === tipoAlvo)
+        );
+
+        if (pokemonsFiltrados.length === 0) {
+            console.log(`\n🔍 Nenhum Pokémon do tipo "${tipoAlvo.toUpperCase()}" foi encontrado na sua Box.`);
+            return;
+        }
+
+        console.log(`\n=================== 🌾 POKÉMONS DO TIPO: ${tipoAlvo.toUpperCase()} ===================`);
+
+        pokemonsFiltrados.forEach((pokemon, index) => {
+            const tiposFormatados = formatarTipos(pokemon.types);
+            
+            // Extrai os status numéricos também para o resultado do filtro
+            const hp = pokemon.stats.find((s: any) => s.stat.name === 'hp')?.base_stat || 0;
+            const attack = pokemon.stats.find((s: any) => s.stat.name === 'attack')?.base_stat || 0;
+            const defense = pokemon.stats.find((s: any) => s.stat.name === 'defense')?.base_stat || 0;
+
+            console.log(`🆔 ID: #${pokemon.id} | 📛 Nome: ${capitalizarTexto(pokemon.name)} | 🌾 Tipos: ${tiposFormatados}`);
+            console.log(`📊 Stats -> ❤️  HP: ${hp} | ⚔️  ATK: ${attack} | 🛡️  DEF: ${defense}`);
+
+            if (index < pokemonsFiltrados.length - 1) {
+                console.log('--------------------------------------------------------------');
+            }
+        });
+
+        console.log('====================================================================');
     }
 
-    const idInput = readlineSync.question("\n🗑️  Digite o ID do Pokémon que deseja remover: ").trim();
-    const idNum = Number(idInput);
+    // Remove um Pokémon do catálogo após listar as opções na tela
+    private executarRemocao(): void {
+        const listaPokemons = BoxRepository.listarTodos();
 
-    if (isNaN(idNum) || !idInput) {
-        console.log("\n⚠️ Por favor, digite um ID numérico válido!");
-        return;
+        if (listaPokemons.length === 0) {
+            console.log("\n Sua Box está vazia! Não há Pokémons para remover.");
+            return;
+        }
+
+        console.log('\n--- Pokémons salvos atualmente ---');
+        this.executarListagem();
+
+        const idInput = readlineSync.question("\n🗑️  Digite o ID do Pokémon que deseja remover: ").trim();
+        const idNum = Number(idInput);
+
+        if (isNaN(idNum) || !idInput) {
+            console.log("\n⚠️ Por favor, digite um ID numérico válido!");
+            return;
+        }
+
+        const removido = BoxRepository.remover(idNum);
+
+        if (!removido) {
+            console.log(`\n⚠️  Nenhum Pokémon encontrado com o ID #${idNum}.`);
+            return;
+        }
+
+        console.log(`\n✅ Pokémon com ID #${idNum} foi removido com sucesso da sua Box!`);
     }
-
-    const removido = BoxRepository.remover(idNum);
-
-    if (!removido) {
-        console.log(`\n⚠️  Nenhum Pokémon encontrado com o ID #${idNum}.`);
-        return;
-    }
-
-    console.log(`\n✅ Pokémon com ID #${idNum} foi removido com sucesso da sua Box!`);
-  }
-    
 }
