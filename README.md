@@ -503,9 +503,9 @@ O desenvolvimento do projeto seguiu rigorosamente as práticas do GitFlow para o
 
 ---
 
-# 👩‍💻 Desenvolvedora
+# Desenvolvedora
 
-**Elen Frankowski**
+👩‍💻 **Elen Frankowski**
 
 🔗 GitHub: [github.com/elenfrankowski](https://github.com/elenfrankowski)
 
