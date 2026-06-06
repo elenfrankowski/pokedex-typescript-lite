@@ -33,6 +33,8 @@ export interface PokemonResumo {
             name: string;
         };
     }[];
+    height: number; 
+    weight: number;
 }
 
 export interface PokemonBoxLocal {

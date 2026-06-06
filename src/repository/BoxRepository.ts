@@ -1,36 +1,61 @@
-import { PokemonApiResponse } from '../models/PokemonResumo.js';
+import { PokemonResumo } from '../models/PokemonResumo.js';
+import { BoxService } from '../services/boxService.js';
 
 export class BoxRepository {
-  // Array privado que funciona como "banco de dados" na memória
-  private static box: PokemonApiResponse[] = [];
+  private static box: PokemonResumo[] = [];
 
-  // Salva um Pokémon na Box.
-  // Retorna true se salvou ou false se o Pokémon já tinha sido capturado.
-  public static salvar(pokemon: PokemonApiResponse): boolean {
+  public static async salvar(pokemon: PokemonResumo): Promise<boolean> {
+    BoxRepository.box = await BoxService.listarPokemons();
+
     const jaExiste = BoxRepository.box.some((p) => p.id === pokemon.id);
-    
     if (jaExiste) {
       return false;
     }
 
-    BoxRepository.box.push(pokemon);
-    return true;
+    const gravouNoArquivo = await BoxService.salvarPokemon(pokemon);
+    
+    if (gravouNoArquivo) {
+      BoxRepository.box.push(pokemon);
+      return true;
+    }
+
+    return false;
   }
 
-  // Retorna a lista de todos os Pokémons salvos.
-  public static listarTodos(): PokemonApiResponse[] {
+  public static async listarTodos(): Promise<PokemonResumo[]> {
+    BoxRepository.box = await BoxService.listarPokemons();
     return BoxRepository.box;
   }
 
-  //Remove um Pokémon da Box através do seu ID
-  public static remover(id: number): boolean {
+  public static async remover(id: number): Promise<boolean> {
+    BoxRepository.box = await BoxService.listarPokemons();
+    
     const existe = this.box.some((pokemon) => pokemon.id === id);
-
     if (!existe) {
       return false;
     }
 
     this.box = this.box.filter((pokemon) => pokemon.id !== id);
+    
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const caminho = path.resolve(process.cwd(), 'pc_box.json');
+    await fs.writeFile(caminho, JSON.stringify(this.box, null, 2), 'utf-8');
+
     return true;
+  }
+
+  public static async calcularPesoMedio(): Promise<number> {
+    BoxRepository.box = await BoxService.listarPokemons();
+    
+    if (BoxRepository.box.length === 0) {
+      return 0;
+    }
+
+    const pesoTotal = BoxRepository.box.reduce((acumulador, pokemon) => {
+      return acumulador + pokemon.weight;
+    }, 0);
+
+    return pesoTotal / BoxRepository.box.length;
   }
 }
