@@ -9,8 +9,16 @@ export class ApiService {
       const resposta = await fetch(`${this.BASE_URL}/${parametroBusca}`);
 
       if (resposta.ok) {
-        const dados = (await resposta.json()) as PokemonResumo;
-        return dados;
+        const dados = await resposta.json() as any;
+        
+        return {
+          id: dados.id,
+          name: dados.name,
+          types: dados.types,
+          height: dados.height,
+          weight: dados.weight,
+          stats: dados.stats
+        };
       }
 
       if (resposta.status === 404) {
