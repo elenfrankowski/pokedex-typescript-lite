@@ -33,7 +33,8 @@ Uma aplicação em linha de comando (CLI) desenvolvida em **TypeScript** e **Nod
 - [Branches Utilizadas](#-branches-utilizadas)
 - [Requisitos Atendidos](#-requisitos-atendidos)
 - [Melhorias Futuras](#-melhorias-futuras)
-- [Desenvolvedora](#-desenvolvedora)
+- [Diferenciais do Projeto](#-diferenciais-do-projeto)
+- [Desenvolvedora](#desenvolvedora)
 
 ---
 
@@ -376,11 +377,11 @@ pokedex-typescript-lite/
 ├── .gitignore
 ├── .prettierrc
 ├── eslint.config.mjs
-├── package.json
 ├── package-lock.json
-├── tsconfig.json
+├── package.json
 ├── pc_box.json
-└── README.md
+├── README.md
+└── tsconfig.json
 ```
 
 ---
@@ -460,7 +461,7 @@ O desenvolvimento do projeto seguiu rigorosamente as práticas do GitFlow para o
 - `feat/box-service`: Criação da camada de leitura e persistência em arquivos com `fs/promises`.
 - `feat/service-api`: Abstração inicial e configuração de chamadas HTTP assíncronas com Fetch.
 - `feat/interfaces-pokemon`: Mapeamento e tipagem inicial das interfaces de contratos e payloads do sistema.
-```
+
 ---
 
 # ✅ Requisitos Atendidos
@@ -510,3 +511,4 @@ O desenvolvimento do projeto seguiu rigorosamente as práticas do GitFlow para o
 
 📚 Projeto desenvolvido como atividade prática do módulo de TypeScript e Node.js, aplicando conceitos de Programação Orientada a Objetos, consumo de APIs REST, persistência de dados em JSON, GitFlow e organização ágil com Kanban.
 
+---
