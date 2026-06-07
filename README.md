@@ -448,6 +448,7 @@ O gerenciamento das tarefas foi realizado utilizando Kanban através do Trello.
 
 O desenvolvimento do projeto seguiu rigorosamente as práticas do GitFlow para o isolamento de features e organização do histórico de commits. As branches utilizadas foram:
 
+- `main`: Branch principal de produção, contendo a versão final, estável e homologada da aplicação.
 - `develop`: Branch padrão de integração contínua do projeto.
 - `adjust/alinhamento-projeto`: Ajustes finais de formatação, exibição de dados e integração do método `.reduce()`.
 - `feat/remover-pokemon-id`: Implementação da lógica de exclusão física de um Pokémon da Box baseado no ID.
